@@ -7,6 +7,9 @@ import { HttpClient } from '@angular/common/http';
 import { Http } from '@angular/http';
 import * as firebase from 'firebase';
 import {snapshotToArray} from '../../environments/environment';
+import { Flashlight } from '@ionic-native/flashlight/ngx';
+import { AlertController } from '@ionic/angular';
+
 @Component({
   selector: 'app-control',
   templateUrl: './control.page.html',
@@ -17,14 +20,25 @@ export class ControlPage implements OnInit {
   ipAddress = enums.APIURL.URL;
   items=[];
   control:any;
+  controlcolor:any;
+  controlflash:any;
   inputText:string ='';
   ref= firebase.database().ref('items/');
-  constructor(private router :Router,private http: HTTP,public https: HttpClient,public httpd: Http) { 
-   this.ref.on('value',resp=>{
+  constructor(private router :Router,private http: HTTP,public https: HttpClient,public httpd: Http,private flashlight: Flashlight,
+    private alertCtrl: AlertController) { 
+    this.apresentPrompt();
+    this.ref.on('value',resp=>{
     this.items=snapshotToArray(resp);
     this.control=snapshotToArray(resp);
-    this.control=this.control[0].name;
-    console.log(this.control);
+    this.controlcolor=this.control[0].Name;
+  
+    this.controlflash=this.control[1].Type;
+    console.log(this.controlflash);
+    if(this.controlflash == 0){
+      this.flashlight.switchOff();
+    }else if(this.controlflash > 0){ 
+        this.FlashLight(this.controlflash);
+    }
   });
   
   }
@@ -37,30 +51,53 @@ export class ControlPage implements OnInit {
   }
 
   loadControl(){
-    // let url = this.ipAddress +'/H-lab/control.php';
-    // this.httpd.get(url).subscribe(
-    //   data => {
-    //     this.posts = data.data;
-    //     console.log(this.posts);
-    //   }
-    //   , (error) => { console.log(error); 
-    //   }
 
-    // );
-//     this.firebase.getToken()
-//   .then(token => console.log(`The token is ${token}`)) // save the token server-side and use it to push notifications to this device
-//   .catch(error => console.error('Error getting token', error));
-
-// this.firebase.onNotificationOpen()
-//    .subscribe(data => console.log(`User opened a notification ${data}`));
-
-// this.firebase.onTokenRefresh()
-//   .subscribe((token: string) => console.log(`Got a new token ${token}`));
   
   }
   addItem(item){
     let newItem=this.ref.push();
     newItem.set(item);
     this.inputText = '';
+  }
+  async delay(ms) {
+    return await new Promise(resolve => setTimeout(resolve, ms));
+  }
+  async FlashLight(time){
+    // do {
+    // this.flashlight.switchOn();
+    // await this.delay(time);
+    // this.flashlight.switchOff();
+    // await this.delay(time);
+    // }while(time!=0);
+  }
+  async apresentPrompt() {
+    let alert =  await this.alertCtrl.create({
+     header : 'กรุณากรอกหมายเลขที่นั้ง',
+      inputs: [
+        {
+          name: 'seats',
+          placeholder: 'หมายเลขที่นั้ง',
+          type: 'text'
+        }
+      ],
+      buttons: [
+        {
+          text: 'ยกเลิก',
+          role: 'cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'ยืนยัน',
+          handler: data => {
+            let newItem=this.ref.push();
+            newItem.set("data.seats");
+            this.inputText = '';
+          }
+        }
+      ]
+    });
+    alert.present();
   }
 }
