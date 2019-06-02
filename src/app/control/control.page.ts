@@ -24,21 +24,39 @@ export class ControlPage implements OnInit {
   controlflash:any;
   inputText:string ='';
   ref= firebase.database().ref('items/');
+  seats: String;
+  str :String;
+  flaslight = 0;
+  flashControl:number;
   constructor(private router :Router,private http: HTTP,public https: HttpClient,public httpd: Http,private flashlight: Flashlight,
     private alertCtrl: AlertController) { 
     this.apresentPrompt();
     this.ref.on('value',resp=>{
     this.items=snapshotToArray(resp);
     this.control=snapshotToArray(resp);
-    this.controlcolor=this.control[0].Name;
-  
-    this.controlflash=this.control[1].Type;
-    console.log(this.controlflash);
-    if(this.controlflash == 0){
-      this.flashlight.switchOff();
-    }else if(this.controlflash > 0){ 
-        this.FlashLight(this.controlflash);
-    }
+    const myObjStrColor = JSON.stringify(this.control[0]);
+    JSON.parse(myObjStrColor, (key, value) => {
+      if (key === this.seats) {
+        this.controlcolor=value;
+        return value;
+      }
+      return value;
+    });
+    const myObjStrFlash = JSON.stringify(this.control[1]);
+    JSON.parse(myObjStrFlash, (key, valueflash) => {
+      if (key === this.seats) {
+        this.flashControl=valueflash;
+        this.FlashLight();
+        // while(this.testf != 0) {
+        //   this.flashlight.switchOn();
+        //   await this.delay(1000);
+        //   this.flashlight.switchOff();
+        //   await this.delay(1000);
+        // }
+        return valueflash;
+      }
+      return valueflash;
+    });
   });
   
   }
@@ -49,26 +67,21 @@ export class ControlPage implements OnInit {
   backHome(){
     this.router.navigate(['/home']);
   }
-
   loadControl(){
 
   
   }
-  addItem(item){
-    let newItem=this.ref.push();
-    newItem.set(item);
-    this.inputText = '';
-  }
   async delay(ms) {
     return await new Promise(resolve => setTimeout(resolve, ms));
   }
-  async FlashLight(time){
-    // do {
-    // this.flashlight.switchOn();
-    // await this.delay(time);
-    // this.flashlight.switchOff();
-    // await this.delay(time);
-    // }while(time!=0);
+  async FlashLight(){
+    while(this.flashControl != 0) {
+      this.flashlight.switchOn();
+      await this.delay(this.flashControl);
+      this.flashlight.switchOff();
+      await this.delay(this.flashControl);
+    }
+    this.flashlight.switchOff();
   }
   async apresentPrompt() {
     let alert =  await this.alertCtrl.create({
@@ -91,13 +104,26 @@ export class ControlPage implements OnInit {
         {
           text: 'ยืนยัน',
           handler: data => {
-            let newItem=this.ref.push();
-            newItem.set("data.seats");
+
+            this.seats= data.seats;
+            let DatabaseReference = firebase.database().ref('items/Color/'+ data.seats);
+            let DatabaseReferenceFlash = firebase.database().ref('items/FlashLight/'+ data.seats);
+            DatabaseReference.set(0);
+            DatabaseReferenceFlash.set(0);
             this.inputText = '';
           }
         }
       ]
     });
-    alert.present();
+
+    await alert.present();
+    return this.seats;
   }
+  // test(){
+  
+  //    console.log(this.controlcolor);
+  //    console.log(this.testf)
+
+  // }
 }
+
