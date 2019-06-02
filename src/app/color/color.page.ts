@@ -9,11 +9,23 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 })
 export class ColorPage implements OnInit {
   data:any;
+  refreshIntervalId;
+  check;
   constructor(private  router : Router, private route : ActivatedRoute, public navCtrl: NavController,private statusBar: StatusBar) { 
     // this.statusBar.hide();
     this.route.queryParams.subscribe(params=>{
-      this.data = params.color;
-      console.log(this.data);
+
+      if(params.color=='random'){
+        this.refreshIntervalId = setInterval(() => { 
+          this.random(); // Now the "this" still references the component
+ 
+       }, 1000);
+       
+      }else{
+        this.data = params.color;
+        console.log(this.data);
+      }
+  
     });
   }
 
@@ -21,8 +33,19 @@ export class ColorPage implements OnInit {
   }
   async ColorScreen(){
     this.router.navigate(['/color-screen']);
-
-
+    clearInterval(this.refreshIntervalId);
   }
+  async delay(ms) {
+    return await new Promise(resolve => setTimeout(resolve, ms));
+  }
+  async random(){
+    var min=0; 
+    var max=255; 
+    var ranR = Math.floor(Math.random() * (+max - +min)) + +min;
+    var ranG = Math.floor(Math.random() * (+max - +min)) + +min;
+    var ranB = Math.floor(Math.random() * (+max - +min)) + +min;
 
+    this.data ='rgb'+'('+""+ranR+""+","+ranG+""+","+ranB+""+')';
+    console.log(this.data);
+  }
 }

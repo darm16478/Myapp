@@ -21,23 +21,25 @@ export class ColorScreenPage implements OnInit {
     this.router.navigate(['/home']);
 
   }
-  colorRed(){
-    let colorParametter ={
-      queryParams : {
-        color : "rgb(255,0,0)"
-      }
-    }
-    this.router.navigate(['/color'],colorParametter);
-  }
-  // 
+
   getColor(event){
     var color = event.target.id;
-    let colorParametter ={
-      queryParams : {
-        color : color
+    if(color=='random'){
+      let colorParametter ={
+        queryParams : {
+          color : 'random'
+        }
       }
+      this.router.navigate(['/color'],colorParametter);
+    }else{
+      let colorParametter ={
+        queryParams : {
+          color : color
+        }
+      }
+      console.log(colorParametter);
+      this.router.navigate(['/color'],colorParametter);
     }
-    console.log(colorParametter);
-    this.router.navigate(['/color'],colorParametter);
-  }
+    }
+    
 }
