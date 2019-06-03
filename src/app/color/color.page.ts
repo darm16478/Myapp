@@ -10,7 +10,6 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 export class ColorPage implements OnInit {
   data:any;
   refreshIntervalId;
-  check;
   constructor(private  router : Router, private route : ActivatedRoute, public navCtrl: NavController,private statusBar: StatusBar) { 
     // this.statusBar.hide();
     this.route.queryParams.subscribe(params=>{
@@ -46,6 +45,5 @@ export class ColorPage implements OnInit {
     var ranB = Math.floor(Math.random() * (+max - +min)) + +min;
 
     this.data ='rgb'+'('+""+ranR+""+","+ranG+""+","+ranB+""+')';
-    console.log(this.data);
   }
 }
